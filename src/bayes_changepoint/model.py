@@ -16,5 +16,19 @@ class RunLengthModel:
         ), "There must be data distribution for each run length!"
         self.run_length_distribution = discrete_distribution(run_lengths, probabilities)
         """Discrete probability distribution over run lengths."""
-        self.data_distributions = data_distributions
+        self.data_distributions: list[NormalInverseGamma] = data_distributions
         """Data distributions for each run length."""
+
+    def likelihood(self, sample: float) -> list[float]:
+        """Calculates the likelihood of a new sample for each run length in the model.
+
+        Args:
+            sample: new sample
+
+        Returns:
+            list of likelihood for each run length
+        """
+
+        return [
+            distribution.likelihood(sample) for distribution in self.data_distributions
+        ]

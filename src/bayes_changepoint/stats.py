@@ -22,8 +22,17 @@ class NormalInverseGamma:
             mu=mean,
             lmbda=n_pseudoobservations,
         )
+        self.n_dof = n_degrees_of_freedom
+        self.n_pseudoobs = n_pseudoobservations
+        self.mean = mean
+        self.variance = variance
+        self.x_marginal_distribution = sp.stats.t(
+            df=self.n_dof,
+            loc=self.mean,
+            scale=sqrt(self.variance),
+        )
 
-    def sample_likelihood(self, sample: float) -> float:
+    def likelihood(self, sample: float) -> float:
         """Calculate sample marginal likelihood.
 
         Args:
@@ -34,12 +43,7 @@ class NormalInverseGamma:
             marginalized)
         """
 
-        return sp.stats.t(
-            sample,
-            df=2 * self.distribution.a,
-            loc=self.distribution.mu,
-            scale=sqrt(self.distribution.b / self.distribution.a),
-        )
+        return self.x_marginal_distribution.pdf(sample)
 
 
 class discrete_distribution:
