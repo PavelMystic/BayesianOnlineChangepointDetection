@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "BayesianOnlineChangepointDetection"
+dependencies = [
+  scipy,
+  numpy,
+  plotly,
+  ipykernel,
+  nbformat
+]
+requires-python = ">= 3.13
+authors = [
+  {name = "Pavel Kulmon", email = "kulmon@seznam.cz"}
+]"
