@@ -74,7 +74,7 @@ class NormalInverseGamma:
         self.mean = updated_mean
         self.n_dof = updated_n_dof
         self.n_pseudoobs = updated_n_pseudoobs
-        self.variance
+        self.variance = updated_variance
 
 
 class discrete_distribution:
