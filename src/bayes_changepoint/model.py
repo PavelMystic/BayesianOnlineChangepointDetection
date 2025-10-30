@@ -37,7 +37,7 @@ class RunLengthModel:
             distribution.likelihood(sample) for distribution in self.data_distributions
         ]
 
-    def grow(self, sample: float):
+    def grow(self, sample: float) -> None:
         """Based on the new sample, recalculate the run length probabilities.
 
         Args:
@@ -47,7 +47,6 @@ class RunLengthModel:
         LAMBDA: Final = 10
         CHANGEPOINT_HAZARD: Final = 1 / LAMBDA
 
-        run_lengths = self.run_length_distribution.domain
         products = [
             run_length_prob * likelihood
             for run_length_prob, likelihood in zip(
@@ -56,11 +55,26 @@ class RunLengthModel:
         ]
 
         changepoint_prob = sum(
-            [product * CHANGEPOINT_HAZARD for product in products]
+            (product * CHANGEPOINT_HAZARD for product in products)
         )  # P(r_t=0, x_1:t)
         extended_run_lengt_probs = [
             product * (1 - CHANGEPOINT_HAZARD) for product in products
         ]  # [P(r_t=r_t-1 + 1, x_1:t)]
-        run_lengths = [run_length + 1 for run_length in run_lengths]
+        extended_run_lengths = [
+            run_length + 1 for run_length in self.run_length_distribution.domain
+        ]
 
-        # prior distribution is of the run length equal to zero
+        for distribution in self.data_distributions:
+            distribution.update([sample])
+
+        extended_run_lengths.insert(0, 0)
+        extended_run_lengt_probs.insert(0, changepoint_prob)
+        evidence = sum(extended_run_lengt_probs)
+        extended_run_lengt_probs = [
+            prob / evidence for prob in extended_run_lengt_probs
+        ]
+
+        self.run_length_distribution = discrete_distribution(
+            extended_run_lengths, extended_run_lengt_probs
+        )
+        self.data_distributions.insert(0, self.prior_data_distribution)
