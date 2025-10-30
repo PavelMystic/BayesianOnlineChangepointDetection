@@ -1,6 +1,8 @@
 from itertools import accumulate
 from random import uniform
 import scipy as sp  # type: ignore
+import numpy as np
+import numpy.typing as npt
 from math import sqrt
 
 
@@ -16,9 +18,11 @@ class NormalInverseGamma:
         n_degrees_of_freedom: float,
         n_pseudoobservations: float,
     ) -> None:
+        self.alpha = n_degrees_of_freedom / 2
+        self.beta = n_degrees_of_freedom * variance / 2
         self.distribution = sp.stats.normal_inverse_gamma(
-            a=n_degrees_of_freedom / 2,
-            b=n_degrees_of_freedom * variance / 2,
+            a=self.alpha,
+            b=self.beta,
             mu=mean,
             lmbda=n_pseudoobservations,
         )
@@ -44,6 +48,12 @@ class NormalInverseGamma:
         """
 
         return self.x_marginal_distribution.pdf(sample)
+
+    def rvs(
+        self, size: tuple[int, ...]
+    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+
+        return self.distribution.rvs(size=size)
 
     def update(self, samples: list[float]) -> None:
         """Update he hyperparameters based on the observed samples.
@@ -75,6 +85,22 @@ class NormalInverseGamma:
         self.n_dof = updated_n_dof
         self.n_pseudoobs = updated_n_pseudoobs
         self.variance = updated_variance
+        self.alpha = self.n_dof / 2
+        self.beta = self.n_dof * self.variance / 2
+
+    def get_mean(self) -> tuple[float, float]:
+
+        return [self.mean, self.beta / (self.alpha - 1)]
+
+    def get_covariance(self) -> npt.NDArray[np.float64]:
+
+        var_mu = self.beta / (self.alpha - 1) / self.n_pseudoobs
+        var_sigma_squared = self.beta**2 / (self.alpha - 1) ** 2 / (self.alpha - 2)
+        cov_mu_sigma_squared = 0
+
+        return np.array(
+            [[var_mu, cov_mu_sigma_squared], [cov_mu_sigma_squared, var_sigma_squared]]
+        )
 
 
 class discrete_distribution:
