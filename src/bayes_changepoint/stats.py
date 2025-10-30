@@ -45,6 +45,37 @@ class NormalInverseGamma:
 
         return self.x_marginal_distribution.pdf(sample)
 
+    def update(self, samples: list[float]) -> None:
+        """Update he hyperparameters based on the observed samples.
+
+        Args:
+            samples: observed samples
+        """
+
+        n_sample = len(samples)
+        sample_mean = sum(samples) / n_sample
+        sample_squared_residual_sum = sum(
+            ((sample - sample_mean) ** 2 for sample in samples)
+        )
+        updated_mean = (self.n_pseudoobs * self.mean + n_sample * sample_mean) / (
+            self.n_pseudoobs + n_sample
+        )
+        updated_n_pseudoobs = self.n_pseudoobs + n_sample
+        updated_n_dof = self.n_dof + n_sample
+        updated_variance = (
+            self.n_dof * self.variance
+            + sample_squared_residual_sum
+            + self.n_pseudoobs
+            * n_sample
+            / (self.n_pseudoobs + n_sample)
+            * (self.mean - sample_mean) ** 2
+        )
+        updated_variance /= updated_n_dof
+        self.mean = updated_mean
+        self.n_dof = updated_n_dof
+        self.n_pseudoobs = updated_n_pseudoobs
+        self.variance
+
 
 class discrete_distribution:
     """Simplistic discrete probability distribution."""
