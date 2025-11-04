@@ -87,6 +87,11 @@ class NormalInverseGamma:
         self.variance = updated_variance
         self.alpha = self.n_dof / 2
         self.beta = self.n_dof * self.variance / 2
+        self.x_marginal_distribution = sp.stats.t(
+            df=self.n_dof,
+            loc=self.mean,
+            scale=sqrt(self.variance),
+        )
 
     def get_mean(self) -> tuple[float, float]:
 
