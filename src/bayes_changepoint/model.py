@@ -1,5 +1,6 @@
 from typing import Final
 from bayes_changepoint.stats import discrete_distribution, NormalInverseGamma
+from copy import deepcopy
 
 
 class RunLengthModel:
@@ -44,7 +45,7 @@ class RunLengthModel:
             sample: _description_
         """
 
-        LAMBDA: Final = 10
+        LAMBDA: Final = 100
         CHANGEPOINT_HAZARD: Final = 1 / LAMBDA
 
         products = [
@@ -77,4 +78,4 @@ class RunLengthModel:
         self.run_length_distribution = discrete_distribution(
             extended_run_lengths, extended_run_lengt_probs
         )
-        self.data_distributions.insert(0, self.prior_data_distribution)
+        self.data_distributions.insert(0, deepcopy(self.prior_data_distribution))
